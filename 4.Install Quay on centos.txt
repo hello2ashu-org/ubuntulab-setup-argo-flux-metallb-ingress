@@ -1,4 +1,6 @@
 sudo apt-get install acl
+https://computingforgeeks.com/setup-red-hat-quay-registry-on-linux-using-podman/
+
 
 sudo yum -y install podman
 podman --version
@@ -17,7 +19,7 @@ sudo podman run -d --name postgresql-quay \
   -v ~/quay/postgres:/var/lib/pgsql/data:Z \
   registry.redhat.io/rhel8/postgresql-16
 
-sudo podman ps
+sudo podman ps -a
 sudo podman exec -it postgresql-quay /bin/bash -c 'echo "CREATE EXTENSION IF NOT EXISTS pg_trgm" | psql -d quay -U postgres'
 
 sudo podman run -d --name redis-quay \
@@ -25,7 +27,7 @@ sudo podman run -d --name redis-quay \
   -e REDIS_PASSWORD=StrongRedisPassw0rd \
   registry.redhat.io/rhel8/redis-6
 
-sudo podman ps
+sudo podman ps -a
 
 sudo vim /etc/hosts (add quay local URL to IP address entry)
 
@@ -73,7 +75,7 @@ sudo podman run -d -p 80:8080 -p 443:8443  \
    -v ~/quay/storage:/datastorage:Z \
    registry.redhat.io/quay/quay-rhel8:v3.11
 
-sudo podman ps
+sudo podman ps -a
 CONTAINER ID  IMAGE                                          COMMAND         CREATED        STATUS        PORTS                                        NAMES
 1f9e6943b7ec  registry.redhat.io/rhel8/postgresql-16:latest  run-postgresql  10 hours ago   Up 10 hours   0.0.0.0:5432->5432/tcp                       postgresql-quay
 2b1e65c3fe6f  registry.redhat.io/rhel8/redis-6:latest        run-redis       10 hours ago   Up 10 hours   0.0.0.0:6379->6379/tcp                       redis-quay
