@@ -1,1 +1,0 @@
-https://geek-cookbook.funkypenguin.co.nz/recipes/kubernetes/authentik/
