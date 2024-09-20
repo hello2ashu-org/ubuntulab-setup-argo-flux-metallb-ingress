@@ -94,3 +94,41 @@ webapp-dev      master@sha1:a5905ea5    False           True    Applied revision
 
 flux reconcile kustomization webapp-dev
 
+ashisgoe@M-C02DV9YAMD6R ~ % flux export source git --all --with-credentials
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: fleet-infra
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  timeout: 1m0s
+  url: https://github.com/hello2ashu/fleet-infra.git
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: test
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: master
+  secretRef:
+    name: test
+  timeout: 1m0s
+  url: https://github.com/hello2ashu/podinfo.git
+---
+apiVersion: v1
+data:
+  password: Z2hwX0M2MnV5aVJQUGU4TjNldk1KNUdueG05c0F6REU3RTJJRXhYVQ==
+  username: aGVsbG8yYXNodUBnbWFpbC5jb20=
+kind: Secret
+metadata:
+  name: test
+  namespace: flux-system
+type: Opaque
+
