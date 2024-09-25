@@ -6,7 +6,10 @@ curl -s https://fluxcd.io/install.sh | sudo FLUX_VERSION=2.3.0 bash
 
 curl -s https://fluxcd.io/install.sh | sudo FLUX_VERSION=2.3.0 bash
 
-flux bootstrap github --owner=hello2ashu --repository=fleet-infra --branch=main --path=./clusters/my-clsuter --personal
+flux check --pre
+
+flux bootstrap github --owner=hello2ashu --repository=fleet-infra --branch=main --path=./clusters/my-cluster --personal
+this will install flux in flux-system ns and create a repo in github with name fleet-infra as private repo
 
 Use "flux get sources [command] --help" for more information about a command.
 ashish@node1:~/git$ flux get sources all
