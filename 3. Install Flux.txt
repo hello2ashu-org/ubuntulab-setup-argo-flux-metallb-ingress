@@ -26,7 +26,8 @@ ashish@node1:~/git$
 
 
 ADD A NEW GIT SOURCE
-flux create source git webapp-latest --url https://github.com/hello2ashu/podinfo --branch=master 
+flux create source git webapp-latest --url https://github.com/hello2ashu/podinfo --branch=master
+flux create source git fluxcd-podinfo --url=https://github.com/hello2ashu/fluxcd-podinfo.git --branch=main --interval=1
 
 Delete GIT SOURCE
 flux delete source git webapp-latest
@@ -97,41 +98,190 @@ webapp-dev      master@sha1:a5905ea5    False           True    Applied revision
 
 flux reconcile kustomization webapp-dev
 
-ashisgoe@M-C02DV9YAMD6R ~ % flux export source git --all --with-credentials
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: fleet-infra
-  namespace: flux-system
-spec:
-  interval: 1m0s
-  ref:
-    branch: main
-  timeout: 1m0s
-  url: https://github.com/hello2ashu/fleet-infra.git
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: test
-  namespace: flux-system
-spec:
-  interval: 1m0s
-  ref:
-    branch: master
-  secretRef:
-    name: test
-  timeout: 1m0s
-  url: https://github.com/hello2ashu/podinfo.git
----
-apiVersion: v1
-data:
-  password: Z2hwX0M2MnV5aVJQUGU4TjNldk1KNUdueG05c0F6REU3RTJJRXhYVQ==
-  username: aGVsbG8yYXNodUBnbWFpbC5jb20=
-kind: Secret
-metadata:
-  name: test
-  namespace: flux-system
-type: Opaque
+create helm repo
+flux create source helm fluxcd-podinfo --url=https://stefanprodan.github.io/podinfo --interval=1m
+
+M-C02DV9YAMD6R:fluxcd-podinfo ashisgoe$ flux get all
+NAME                            REVISION                SUSPENDED       READY   MESSAGE                                           
+gitrepository/flux-system       main@sha1:d0b03951      False           True    stored artifact for revision 'main@sha1:d0b03951'
+gitrepository/fluxcd-podinfo    main@sha1:b9b1a0ab      False           True    stored artifact for revision 'main@sha1:b9b1a0ab'
+
+NAME                            REVISION        SUSPENDED       READY   MESSAGE                                     
+helmrepository/fluxcd-podinfo   sha256:3dfe15d8 False           True    stored artifact: revision 'sha256:3dfe15d8'
+
+NAME                            REVISION                SUSPENDED       READY   MESSAGE                              
+kustomization/flux-system       main@sha1:d0b03951      False           True    Applied revision: main@sha1:d0b03951
+kustomization/fluxcd-podinfo    main@sha1:b9b1a0ab      False           True    Applied revision: main@sha1:b9b1a0ab
+
+M-C02DV9YAMD6R:fluxcd-podinfo ashisgoe$ kubectl get helmrepository -A
+NAMESPACE     NAME             URL                                      AGE   READY   STATUS
+flux-system   fluxcd-podinfo   https://stefanprodan.github.io/podinfo   31s   True    stored artifact: revision 'sha256:3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c'
+M-C02DV9YAMD6R:fluxcd-podinfo ashisgoe$ 
+
+M-C02DV9YAMD6R:fluxcd-podinfo ashisgoe$ kubectl describe helmrepository fluxcd-podinfo -n flux-system
+Name:         fluxcd-podinfo
+Namespace:    flux-system
+Labels:       <none>
+Annotations:  <none>
+API Version:  source.toolkit.fluxcd.io/v1
+Kind:         HelmRepository
+Metadata:
+  Creation Timestamp:  2024-09-25T18:35:23Z
+  Finalizers:
+    finalizers.fluxcd.io
+  Generation:        1
+  Resource Version:  63492
+  UID:               8372ecfe-be1b-4979-aa15-65bfa4fa01f5
+Spec:
+  Interval:  1m0s
+  Provider:  generic
+  URL:       https://stefanprodan.github.io/podinfo
+Status:
+  Artifact:
+    Digest:            sha256:8baadeacee92e7e9ad2cf0c8e609a5824d9487b4b3a910d9888214927c5f2ba3
+    Last Update Time:  2024-09-25T18:35:24Z
+    Path:              helmrepository/flux-system/fluxcd-podinfo/index-3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c.yaml
+    Revision:          sha256:3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c
+    Size:              67932
+    URL:               http://source-controller.flux-system.svc.cluster.local./helmrepository/flux-system/fluxcd-podinfo/index-3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c.yaml
+  Conditions:
+    Last Transition Time:  2024-09-25T18:35:24Z
+    Message:               stored artifact: revision 'sha256:3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c'
+    Observed Generation:   1
+    Reason:                Succeeded
+    Status:                True
+    Type:                  Ready
+    Last Transition Time:  2024-09-25T18:35:24Z
+    Message:               stored artifact: revision 'sha256:3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c'
+    Observed Generation:   1
+    Reason:                Succeeded
+    Status:                True
+    Type:                  ArtifactInStorage
+  Observed Generation:     1
+  URL:                     http://source-controller.flux-system.svc.cluster.local./helmrepository/flux-system/fluxcd-podinfo/index.yaml
+Events:
+  Type    Reason            Age   From               Message
+  ----    ------            ----  ----               -------
+  Normal  NewArtifact       111s  source-controller  stored fetched index of size 67.93kB from 'https://stefanprodan.github.io/podinfo'
+  Normal  ArtifactUpToDate  48s   source-controller  artifact up-to-date with remote revision: 'sha256:3dfe15d87f81dedc8ddaf116c7302892e54a0d8f269e35f65aaff9ac4d1b179c'
+M-C02DV9YAMD6R:fluxcd-podinfo ashisgoe$ 
+
+
+flux create helmrelease fluxcd-podinfo --source=helmrepository/fluxcd-podinfo --chart=podinfo --chart-version="5.1.2" --target-namespace=ashish --interval=1m
+
+M-C02DV9YAMD6R:fluxcd-podinfo ashisgoe$ flux get all
+NAME                            REVISION                SUSPENDED       READY   MESSAGE                                           
+gitrepository/flux-system       main@sha1:d0b03951      False           True    stored artifact for revision 'main@sha1:d0b03951'
+gitrepository/fluxcd-podinfo    main@sha1:b9b1a0ab      False           True    stored artifact for revision 'main@sha1:b9b1a0ab'
+
+NAME                            REVISION        SUSPENDED       READY   MESSAGE                                     
+helmrepository/fluxcd-podinfo   sha256:3dfe15d8 False           True    stored artifact: revision 'sha256:3dfe15d8'
+
+NAME                                    REVISION        SUSPENDED       READY   MESSAGE                                     
+helmchart/flux-system-fluxcd-podinfo    5.1.2           False           True    pulled 'podinfo' chart with version '5.1.2'
+
+NAME                            REVISION        SUSPENDED       READY   MESSAGE                                                                                     
+helmrelease/fluxcd-podinfo      5.1.2           False           True    Helm install succeeded for release ashish/ashish-fluxcd-podinfo.v1 with chart podinfo@5.1.2
+
+NAME                            REVISION                SUSPENDED       READY   MESSAGE                              
+kustomization/flux-system       main@sha1:d0b03951      False           True    Applied revision: main@sha1:d0b03951
+kustomization/fluxcd-podinfo    main@sha1:b9b1a0ab      False           True    Applied revision: main@sha1:b9b1a0ab
+
+
+M-C02DV9YAMD6R:5-oci-repo ashisgoe$ pwd
+/Users/ashisgoe/OneDrive - Nokia/Nokia_laptop/4. Projects/git_training/fluxcd-ashish/Mastering-FluxCD-and-Flagger-A-Complete-GitOps-Guide-ashish/0-Demo-Files/5-oci-repo
+M-C02DV9YAMD6R:5-oci-repo ashisgoe$ kubectl apply -f oci-repo.yaml 
+ocirepository.source.toolkit.fluxcd.io/podinfo created
+M-C02DV9YAMD6R:5-oci-repo ashisgoe$ 
+
+
+
+M-C02DV9YAMD6R:fluxcd-ashish ashisgoe$ kubectl get ocirepository
+NAME      URL                                            READY   STATUS                                                                                                        AGE
+podinfo   oci://ghcr.io/stefanprodan/manifests/podinfo   True    stored artifact for digest 'latest@sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5'   60s
+M-C02DV9YAMD6R:fluxcd-ashish ashisgoe$ kubectl describe ocirepository podinfo
+Name:         podinfo
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  source.toolkit.fluxcd.io/v1beta2
+Kind:         OCIRepository
+Metadata:
+  Creation Timestamp:  2024-09-25T19:00:16Z
+  Finalizers:
+    finalizers.fluxcd.io
+  Generation:        1
+  Resource Version:  68211
+  UID:               8f8a4a6a-2b35-451b-ab44-42e8b7e8bccd
+Spec:
+  Interval:  5m
+  Provider:  generic
+  Ref:
+    Tag:    latest
+  Timeout:  60s
+  URL:      oci://ghcr.io/stefanprodan/manifests/podinfo
+Status:
+  Artifact:
+    Digest:            sha256:776e5c1a1ac70959210bde5a9acb405b28b95bda40f02da92fde179c590242ae
+    Last Update Time:  2024-09-25T19:00:18Z
+    Metadata:
+      org.opencontainers.image.created:   2024-06-23T18:31:17Z
+      org.opencontainers.image.revision:  6.7.0/0b1481aa8ed0a6c34af84f779824a74200d5c1d6
+      org.opencontainers.image.source:    https://github.com/stefanprodan/podinfo
+    Path:                                 ocirepository/default/podinfo/sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5.tar.gz
+    Revision:                             latest@sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5
+    Size:                                 1111
+    URL:                                  http://source-controller.flux-system.svc.cluster.local./ocirepository/default/podinfo/sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5.tar.gz
+  Conditions:
+    Last Transition Time:  2024-09-25T19:00:18Z
+    Message:               stored artifact for digest 'latest@sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5'
+    Observed Generation:   1
+    Reason:                Succeeded
+    Status:                True
+    Type:                  Ready
+    Last Transition Time:  2024-09-25T19:00:18Z
+    Message:               stored artifact for digest 'latest@sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5'
+    Observed Generation:   1
+    Reason:                Succeeded
+    Status:                True
+    Type:                  ArtifactInStorage
+  Observed Generation:     1
+  URL:                     http://source-controller.flux-system.svc.cluster.local./ocirepository/default/podinfo/latest.tar.gz
+Events:
+  Type    Reason       Age   From               Message
+  ----    ------       ----  ----               -------
+  Normal  NewArtifact  66s   source-controller  stored artifact with revision 'latest@sha256:f74fa29c9ebfc7f55b0d829166812ce03c9e3951ab16954863cef1d12837c7a5' from 'oci://ghcr.io/stefanprodan/manifests/podinfo', origin source 'https://github.com/stefanprodan/podinfo', origin revision '6.7.0/0b1481aa8ed0a6c34af84f779824a74200d5c1d6'
+M-C02DV9YAMD6R:fluxcd-ashish ashisgoe$ 
+
+
+M-C02DV9YAMD6R:fluxcd-ashish ashisgoe$ flux get all -A
+NAMESPACE       NAME                    REVISION                SUSPENDED       READY   MESSAGE                                             
+default         ocirepository/podinfo   latest@sha256:f74fa29c  False           True    stored artifact for digest 'latest@sha256:f74fa29c'
+
+NAMESPACE       NAME                            REVISION                SUSPENDED       READY   MESSAGE                                           
+flux-system     gitrepository/flux-system       main@sha1:d0b03951      False           True    stored artifact for revision 'main@sha1:d0b03951'
+flux-system     gitrepository/fluxcd-podinfo    main@sha1:b9b1a0ab      False           True    stored artifact for revision 'main@sha1:b9b1a0ab'
+
+NAMESPACE       NAME                            REVISION        SUSPENDED       READY   MESSAGE                                     
+flux-system     helmrepository/fluxcd-podinfo   sha256:3dfe15d8 False           True    stored artifact: revision 'sha256:3dfe15d8'
+
+NAMESPACE       NAME                                    REVISION        SUSPENDED       READY   MESSAGE                                     
+flux-system     helmchart/flux-system-fluxcd-podinfo    5.1.2           False           True    pulled 'podinfo' chart with version '5.1.2'
+
+NAMESPACE       NAME                            REVISION        SUSPENDED       READY   MESSAGE                                                                                     
+flux-system     helmrelease/fluxcd-podinfo      5.1.2           False           True    Helm install succeeded for release ashish/ashish-fluxcd-podinfo.v1 with chart podinfo@5.1.2
+
+NAMESPACE       NAME                            REVISION                SUSPENDED       READY   MESSAGE                              
+flux-system     kustomization/flux-system       main@sha1:d0b03951      False           True    Applied revision: main@sha1:d0b03951
+flux-system     kustomization/fluxcd-podinfo    main@sha1:b9b1a0ab      False           True    Applied revision: main@sha1:b9b1a0ab
+
+M-C02DV9YAMD6R:fluxcd-ashish ashisgoe$ 
+
+
+
+
+
+
+
+
 
