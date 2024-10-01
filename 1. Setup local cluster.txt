@@ -130,3 +130,41 @@ ssh-copy-id -i /Users/ashisgoe/.ssh/id_ed25519 ashish@192.168.189.59
 ssh-copy-id -i /Users/ashisgoe/.ssh/id_ed25519 ashish@192.168.189.60
 vboxmanage list vms
 for i in `vboxmanage list vms | cut -f1 -d " " | sed 's|[",]||g'`; do vboxmanage startvm $i --type=headless;done
+
+
+helm install metallb metallb/metallb --create-namespace --namespace=metallb 
+
+ashisgoe@M-C02DV9YAMD6R nginx % kubectl api-resources | grep metallb
+bfdprofiles                                      metallb.io/v1beta1                       true         BFDProfile
+bgpadvertisements                                metallb.io/v1beta1                       true         BGPAdvertisement
+bgppeers                                         metallb.io/v1beta2                       true         BGPPeer
+communities                                      metallb.io/v1beta1                       true         Community
+ipaddresspools                                   metallb.io/v1beta1                       true         IPAddressPool
+l2advertisements                                 metallb.io/v1beta1                       true         L2Advertisement
+servicel2statuses                                metallb.io/v1beta1                       true         ServiceL2Status
+
+helm install nginx-ingress ingress-nginx/ingress-nginx --create-namespace -n ingress-nginx
+ashisgoe@M-C02DV9YAMD6R nginx % kubectl edit daemonset nginx-ingress-ingress-nginx-controller -n ingress-nginx
+            - --enable-ssl-passthrough
+            
+            
+daemonset.apps/nginx-ingress-ingress-nginx-controller edited
+
+
+helm install metallb metallb/metallb -n metallb
+
+kubectl apply -f metallb-ippool.yaml -n metallb
+kubectl apply -f metallb-l2adv.yaml -n metallb
+kubectl get svc -A
+ 1655  ls -ltrh 
+ 
+ add --enable-ssl-passthrough
+ 
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl add ingress (apply the ingress file)
+
+
+
+ 
