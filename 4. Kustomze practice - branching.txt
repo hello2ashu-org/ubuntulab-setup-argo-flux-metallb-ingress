@@ -1,0 +1,5 @@
+git branch kust-base
+git switch kust-base
+change replica count
+git commit -a -m "update min max replica to 2"
+git push --set-upstream origin kust-base		
