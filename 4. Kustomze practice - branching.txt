@@ -2,4 +2,15 @@ git branch kust-base
 git switch kust-base
 change replica count
 git commit -a -m "update min max replica to 2"
-git push --set-upstream origin kust-base		
+git push --set-upstream origin kust-base
+	
+kustomize build base
+flux create source git kust-base --url https://github.com/hello2ashu/ubuntulab-setup-argo-flux-metallb-ingress.git --branch=kust-base
+	
+flux delete kustomization kust-base
+	
+Create source	
+flux bootstrap github --owner=hello2ashu --repository=ubuntulab-setup-argo-flux-metallb-ingress --branch=kust-base --path=./clusters/my-cluster
+flux create kustomization kust-base --source=flux-system --path="./3-Kustomize/base" --prune=true --interval=1m --retry-interval=2m --health-check-timeout=3m --target-namespace=kust-base
+	
+	
