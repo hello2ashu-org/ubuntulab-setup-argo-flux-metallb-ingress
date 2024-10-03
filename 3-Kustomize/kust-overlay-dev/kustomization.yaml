@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: my-desired-namespace
 resources:
-- ns.yaml
+- ./ns.yaml
 - ../base
 patches:
 - path: hpa.yaml
